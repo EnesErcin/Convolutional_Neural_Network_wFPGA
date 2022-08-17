@@ -1,0 +1,11 @@
+Since the main purpose of this repository is to build convulutional
+nerual network hardware it felt unappropirate to use someone elses
+floating point arithmatic unit because one simple mistake may cause
+catastrophic results.Imageine if this design later expaned to used
+in ai soldiers who shoots the enemy and protects the childeren. One
+decimal after floating point in first layer may confuse the ai.
+
+Jokes asside It would be impossible to debug at higher levels.
+In addition since I want to build more advanced stuff in  future 
+I felt the neccesity to build my own IEEE-754 standart floating
+point arithmatic unit.

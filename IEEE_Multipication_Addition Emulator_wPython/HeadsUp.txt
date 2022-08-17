@@ -1,0 +1,11 @@
+This module has huge deficiency such as:
+-Only works when Second Input has higher exponent (Easy Fix)
+-Probably wont work when exponents are equal (Easy Fix)
+-Code should be cleared and organaized (Delete the unnecesery parts)
+
+I stoped wasting time on this module as soon as I felt ready to 
+implement real digital design on Verilog.
+
+For some reason it took me so long to finally comprehend
+the IEEE-754 Standart floating point arithmatic.
+
