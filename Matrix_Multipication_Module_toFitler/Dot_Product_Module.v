@@ -44,14 +44,15 @@ wire [31:0]  Img_bit_arr[8:0];
 wire [31:0]  Multipication_reg[9:0];
 wire [31:0]  Multipication_wire[9:0];
 
-wire [31:0]  addition_reg_inital[8:1]; // Only 4 is used
+wire [31:0]  addition_reg_inital[9:0]; // Only 4 is used
 wire [31:0]  addition_reg_second[1:0]; // All used
 wire [31:0]  addition_reg_third; // All used
 
-wire ready_mult_out;
+wire ready_mult_out[8:0];
 reg initate_multipliers,initate_adders;
 reg initate_second_stage,initate_third_stage,initate_final_stage;
-wire ready_inital_adders,ready_second_stage,ready_third_stage,ready_final_stage;
+wire ready_inital_adders[8:0];
+wire ready_second_stage,ready_third_stage,ready_final_stage;
 
 // Load the filters, Img bits to an array for convinence
     //  Load Filters
@@ -100,14 +101,15 @@ Initate_Multi_param           : begin
                      
                         initate_multipliers <= 1'b1;
                         timer<= timer + 1;
-                        if(ready_mult_out == 1)
+                        if(ready_mult_out[0] == 1)
                         Dot_Product_Stage_reg <= Initate_first_stage_param  ;               
                         end
 Initate_first_stage_param     :begin
                         initate_multipliers <=1'b0;
                         initate_adders <=1'b1;
+//                        $display("Values that goes into adders are: %b and  %b ", Multipication_reg[0],Multipication_reg[1]);
                         timer<= timer + 1;
-                        if(ready_inital_adders == 1)
+                        if(ready_inital_adders[1] == 1)
                         Dot_Product_Stage_reg <= Initate_second_stage_param  ;               
                         end
 Initate_second_stage_param    : begin 
@@ -141,15 +143,15 @@ end
 genvar numof_multiplier;                                
 generate 
 for (numof_multiplier = 0; numof_multiplier < filtersize +1 ; numof_multiplier = numof_multiplier + 1) begin
-IEEE_FPU_mult_i(.initate(initate_multipliers),.a_in(Img_bit_arr[numof_multiplier]),.b_in(Filter_arr[numof_multiplier]),.clk(clk),.Result(Multipication_reg[numof_multiplier]),.ready_mult_out(ready_mult_out));
+IEEE_FPU_mult_i Filter_Multiply(.initate(initate_multipliers),.a_in(Img_bit_arr[numof_multiplier]),.b_in(Filter_arr[numof_multiplier]),.clk(clk),.Result(Multipication_reg[numof_multiplier]),.ready_mult_out(ready_mult_out[numof_multiplier]));
 if(numof_multiplier % 2 == 1)   // Dont assume this numbers have any meaning
-FPU_addition_uni_t first_stage_adders(.clk(clk),.initate(initate_adders),.a_in(Multipication_reg[numof_multiplier-1]),.b_in(Multipication_reg[numof_multiplier]),.ready(ready_inital_adders),.result(addition_reg_inital[numof_multiplier]));
+FPU_addition_unit first_stage_adders(.clk(clk),.initate(initate_adders),.a_in(Multipication_reg[numof_multiplier-1]),.b_in(Multipication_reg[numof_multiplier]),.ready(ready_inital_adders[numof_multiplier]),.result(addition_reg_inital[numof_multiplier]));
 if(numof_multiplier % 4 == 3)
-FPU_addition_uni_t  second_stage_adders(.clk(clk),.initate(initate_second_stage),.a_in(addition_reg_inital[numof_multiplier-2]),.b_in(addition_reg_inital[numof_multiplier]),.ready(ready_second_stage),.result(addition_reg_second[numof_multiplier%3])); // numof_multiplier % 3
+FPU_addition_unit  second_stage_adders(.clk(clk),.initate(initate_second_stage),.a_in(addition_reg_inital[numof_multiplier-2]),.b_in(addition_reg_inital[numof_multiplier]),.ready(ready_second_stage),.result(addition_reg_second[numof_multiplier%3])); // numof_multiplier % 3
 if(numof_multiplier % 7 == 6)
-FPU_addition_uni_t  third_stage_adder(.clk(clk),.initate(initate_third_stage),.a_in(addition_reg_second[0]),.b_in(addition_reg_second[1]),.ready(ready_third_stage),.result(addition_reg_third));
+FPU_addition_unit  third_stage_adder(.clk(clk),.initate(initate_third_stage),.a_in(addition_reg_second[0]),.b_in(addition_reg_second[1]),.ready(ready_third_stage),.result(addition_reg_third));
 if(numof_multiplier == 9)
-FPU_addition_uni_t  final_adder(.clk(clk),.initate(initate_final_stage),.a_in(addition_reg_third),.b_in(Img_bit_arr[8]),.ready(ready_final_stage),.result(window_filter));      
+FPU_addition_unit  final_adder(.clk(clk),.initate(initate_final_stage),.a_in(addition_reg_third),.b_in(Img_bit_arr[8]),.ready(ready_final_stage),.result(window_filter));      
 end endgenerate   
 
 // Load the filters, Img bits to an array for convinence
